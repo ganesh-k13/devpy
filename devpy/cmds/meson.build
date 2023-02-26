@@ -3,6 +3,7 @@ python_sources = [
   '_build.py',
   '_shell.py',
   '_test.py',
+  '_bench.py',
   'util.py'
 ]
 

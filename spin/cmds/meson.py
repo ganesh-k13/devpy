@@ -252,8 +252,7 @@ build_dir_option = click.option(
     "-j",
     "--jobs",
     metavar="N_JOBS",
-    help="Number of parallel tasks to launch",
-    type=int,
+    help="Number of parallel tasks to launch. Can be set to `auto` to use all cores.",
 )
 @click.option("--clean", is_flag=True, help="Clean build directory before build")
 @click.option(
@@ -364,9 +363,24 @@ def build(
 
         # Any other conditions that warrant a reconfigure?
 
+    if jobs is not None:
+        if jobs == "auto":
+            jobs = str(os.cpu_count() or 1)
+        else:
+            try:
+                jobs = str(int(jobs))
+            except ValueError as err:
+                raise click.BadParameter(
+                    f"Expected an integer or 'auto', got '{jobs}'", param_hint="'-j'"
+                ) from err
+
     compile_flags = ["-v"] if verbose else []
     if jobs:
-        compile_flags += ["-j", str(jobs)]
+        if not quiet:
+            click.secho(
+                f"Building with {jobs} parallel jobs", bold=True, fg="bright_blue"
+            )
+        compile_flags += ["-j", jobs]
 
     p = _run(
         _meson_cli()

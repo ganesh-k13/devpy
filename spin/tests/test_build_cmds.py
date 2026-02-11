@@ -36,6 +36,20 @@ def test_debug_builds(example_pkg):
     assert len(list(debug_files)) != 0, "debug files not generated for gcov build"
 
 
+def test_build_jobs_auto(example_pkg):
+    """Does `spin build -j auto` work?"""
+    p = spin("build", "-j", "auto")
+    assert b"Building with" in p.stdout
+    assert b"parallel jobs" in p.stdout
+
+
+def test_build_jobs_invalid(example_pkg):
+    """Does `spin build -j nan` fail with a clear error?"""
+    p = spin("build", "-j", "nan", sys_exit=False)
+    assert p.returncode != 0
+    assert b"Expected an integer or 'auto'" in p.stderr
+
+
 def test_prefix_builds(example_pkg):
     """does spin build --prefix create a build-install directory with the correct structure?"""
     spin("build", "--prefix=/foobar/")
